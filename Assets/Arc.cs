@@ -4,35 +4,32 @@ using UnityEngine.Assertions;
 
 public readonly struct Arc
 {
-    private readonly Vector3 _normal;
-    private readonly Vector3 _from;
-    private readonly float _sweepAngle;
-    
+    public Vector3 Normal { get; }
+    public float SweepAngle { get; }
     public Vector3 Start { get; }
     public Vector3 Middle { get; }
     public Vector3 End { get; }
 
-    public Arc(Vector3 normal, Vector3 from, float sweepAngle)
+    public Arc(Vector3 start, Vector3 normal, float sweepAngle)
     {
-        _normal = normal;
-        _from = from;
-        _sweepAngle = sweepAngle;
-        
-        Start = _from;
-        Middle = Quaternion.AngleAxis(sweepAngle / 2, normal) * _from;
-        End = Quaternion.AngleAxis(sweepAngle, normal) * _from;
+        Start = start;
+        Normal = normal;
+        SweepAngle = sweepAngle;
+
+        Middle = Quaternion.AngleAxis(sweepAngle / 2, normal) * start;
+        End = Quaternion.AngleAxis(sweepAngle, normal) * start;
     }
-    
+
     public Arc Rotate(float angle)
     {
-        return new Arc(_normal, Quaternion.AngleAxis(angle, _normal) * _from, _sweepAngle);
+        return new Arc(Quaternion.AngleAxis(angle, Normal) * Start, Normal, SweepAngle);
     }
-    
+
     public Arc Resize(float degrees)
     {
-        var from = Quaternion.AngleAxis(-degrees / 2f, _normal) * _from;
-        var sweepAngle = _sweepAngle + degrees;
-        return new Arc(_normal, from, sweepAngle);
+        var from = Quaternion.AngleAxis(-degrees / 2f, Normal) * Start;
+        var sweepAngle = SweepAngle + degrees;
+        return new Arc(from, Normal, sweepAngle);
     }
 
     public Arc Clamp(Arc outer)
@@ -42,18 +39,18 @@ public readonly struct Arc
 
     public static Arc Clamp(Arc inner, Arc outer)
     {
-        Assert.IsTrue(inner._normal == outer._normal, "Arcs must have the same normal");
-        
-        if (inner._sweepAngle > outer._sweepAngle)
+        Assert.IsTrue(inner.Normal == outer.Normal, "Arcs must have the same normal");
+
+        if (inner.SweepAngle > outer.SweepAngle)
         {
             return outer;
         }
 
-        if (TryGetOvershoot(inner, outer, inner._normal, out var overshoot))
+        if (TryGetOvershoot(inner, outer, inner.Normal, out var overshoot))
         {
             return inner.Rotate(-overshoot);
         }
-        
+
         return inner;
     }
 
@@ -82,12 +79,11 @@ public readonly struct Arc
         }
 
         return false;
-
     }
-    
+
     public void Draw(Color color)
     {
         Handles.color = color;
-        Handles.DrawSolidArc(Vector3.zero, _normal, _from, _sweepAngle, 1);
+        Handles.DrawSolidArc(Vector3.zero, Normal, Start, SweepAngle, 1);
     }
 }

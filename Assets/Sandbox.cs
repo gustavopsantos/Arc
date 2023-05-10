@@ -15,13 +15,13 @@ public class Sandbox : MonoBehaviour
     
     private void Start()
     {
-        _view = new Arc(Vector3.up, Vector3.forward, 20);
+        _view = new Arc(Vector3.forward, Vector3.up, 20);
     }
 
     private void Update()
     {
         GetInput(out var horizontal, out var vertical);
-        _bounds = new Arc(Vector3.up, Quaternion.Euler(0, _boundsOffset, 0) * Vector3.forward, _boundsSweepAngle);
+        _bounds = new Arc(Quaternion.Euler(0, _boundsOffset, 0) * Vector3.forward, Vector3.up, _boundsSweepAngle);
         _view = _view.Rotate(horizontal).Resize(vertical).Clamp(_bounds);
     }
 
