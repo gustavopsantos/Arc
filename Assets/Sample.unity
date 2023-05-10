@@ -167,7 +167,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27e418cd4d2ff9749a531d7b0bf3e181, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _viewColor: {r: 0, g: 0, b: 0, a: 0.078431375}
-  _boundsColor: {r: 0, g: 1, b: 0, a: 0.078431375}
+  _viewColor: {r: 0, g: 0.04940009, b: 1, a: 0.3137255}
+  _boundsColor: {r: 0, g: 1, b: 0, a: 0.15686275}
   _boundsSweepAngle: 160
   _boundsOffset: -80

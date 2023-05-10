@@ -1,5 +1,6 @@
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public readonly struct Arc
 {
@@ -34,29 +35,36 @@ public readonly struct Arc
         return new Arc(_normal, from, sweepAngle);
     }
 
-    public Arc Clamp(Arc bounds)
+    public Arc Clamp(Arc outer)
     {
-        if (_sweepAngle > bounds._sweepAngle)
-        {
-            return bounds;
-        }
-
-        if (TryGetOvershoot(this, bounds, out var overshoot))
-        {
-            return Rotate(-overshoot);
-        }
-        
-        return this;
+        return Clamp(this, outer);
     }
 
-    private static bool TryGetOvershoot(Arc inner, Arc outer, out float overshoot)
+    public static Arc Clamp(Arc inner, Arc outer)
     {
-        var outerTangent = Vector3.Cross(outer.Middle, -outer._normal);
+        Assert.IsTrue(inner._normal == outer._normal, "Arcs must have the same normal");
+        
+        if (inner._sweepAngle > outer._sweepAngle)
+        {
+            return outer;
+        }
+
+        if (TryGetOvershoot(inner, outer, inner._normal, out var overshoot))
+        {
+            return inner.Rotate(-overshoot);
+        }
+        
+        return inner;
+    }
+
+    private static bool TryGetOvershoot(Arc inner, Arc outer, Vector3 normal, out float overshoot)
+    {
+        var outerTangent = Vector3.Cross(outer.Middle, -normal);
         var innerSideLocalToOuter = Vector3.Dot(inner.Middle, outerTangent);
 
         if (innerSideLocalToOuter >= 0) // Inner its on outer right quadrant
         {
-            overshoot = -Vector3.SignedAngle(inner.End, outer.End, outer._normal);
+            overshoot = -Vector3.SignedAngle(inner.End, outer.End, normal);
 
             if (overshoot > 0)
             {
@@ -65,7 +73,7 @@ public readonly struct Arc
         }
         else // Inner its on outer left quadrant
         {
-            overshoot = -Vector3.SignedAngle(inner.Start, outer.Start, outer._normal);
+            overshoot = -Vector3.SignedAngle(inner.Start, outer.Start, normal);
 
             if (overshoot < 0)
             {
@@ -81,12 +89,5 @@ public readonly struct Arc
     {
         Handles.color = color;
         Handles.DrawSolidArc(Vector3.zero, _normal, _from, _sweepAngle, 1);
-
-        Gizmos.color = Color.red;
-        Gizmos.DrawRay(Vector3.zero, Start);
-        Gizmos.color = Color.green;
-        Gizmos.DrawRay(Vector3.zero, Middle);
-        Gizmos.color = Color.blue;
-        Gizmos.DrawRay(Vector3.zero, End);
     }
 }
