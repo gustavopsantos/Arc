@@ -42,19 +42,27 @@ public readonly struct Arc
             return bounds;
         }
 
-        var boundsRight = Vector3.Cross(bounds.Middle, -bounds._normal);
-        var side = Math.Sign(Vector3.Dot(boundsRight, Middle));
+        var boundsTangent = Vector3.Cross(bounds.Middle, -bounds._normal);
+        var side = Vector3.Dot(Middle, boundsTangent);
 
-        var overshoot = side == 1
-            ? Vector3.SignedAngle(End, bounds.End, -_normal)
-            : Vector3.SignedAngle(Start, bounds.Start, _normal);
-        
-        Debug.Log(overshoot);
-        
 
-        if (overshoot > 0)
+        if (side >= 0) // Im on right quadrant
         {
-            return Rotate(overshoot * side * -1);
+            var overshoot = Vector3.SignedAngle(End, bounds.End, _normal);
+
+            if (overshoot < 0)
+            {
+                return Rotate(overshoot);
+            }
+        }
+        else // Im on left quadrant
+        {
+            var overshoot = Vector3.SignedAngle(Start, bounds.Start, _normal);
+
+            if (overshoot > 0)
+            {
+                return Rotate(overshoot);
+            }
         }
 
         return this;
