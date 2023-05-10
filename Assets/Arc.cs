@@ -1,4 +1,3 @@
-using System;
 using UnityEditor;
 using UnityEngine;
 
@@ -44,7 +43,7 @@ public readonly struct Arc
 
         if (TryGetOvershoot(this, bounds, out var overshoot))
         {
-            return Rotate(overshoot);
+            return Rotate(-overshoot);
         }
         
         return this;
@@ -57,18 +56,18 @@ public readonly struct Arc
 
         if (innerSideLocalToOuter >= 0) // Inner its on outer right quadrant
         {
-            overshoot = Vector3.SignedAngle(inner.End, outer.End, outer._normal);
+            overshoot = -Vector3.SignedAngle(inner.End, outer.End, outer._normal);
 
-            if (overshoot < 0)
+            if (overshoot > 0)
             {
                 return true;
             }
         }
         else // Inner its on outer left quadrant
         {
-            overshoot = Vector3.SignedAngle(inner.Start, outer.Start, outer._normal);
+            overshoot = -Vector3.SignedAngle(inner.Start, outer.Start, outer._normal);
 
-            if (overshoot > 0)
+            if (overshoot < 0)
             {
                 return true;
             }
