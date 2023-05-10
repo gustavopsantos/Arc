@@ -42,30 +42,40 @@ public readonly struct Arc
             return bounds;
         }
 
-        var boundsTangent = Vector3.Cross(bounds.Middle, -bounds._normal);
-        var side = Vector3.Dot(Middle, boundsTangent);
-
-
-        if (side >= 0) // Im on right quadrant
+        if (TryGetOvershoot(this, bounds, out var overshoot))
         {
-            var overshoot = Vector3.SignedAngle(End, bounds.End, _normal);
+            return Rotate(overshoot);
+        }
+        
+        return this;
+    }
+
+    private static bool TryGetOvershoot(Arc inner, Arc outer, out float overshoot)
+    {
+        var outerTangent = Vector3.Cross(outer.Middle, -outer._normal);
+        var innerSideLocalToOuter = Vector3.Dot(inner.Middle, outerTangent);
+
+        if (innerSideLocalToOuter >= 0) // Inner its on outer right quadrant
+        {
+            overshoot = Vector3.SignedAngle(inner.End, outer.End, outer._normal);
 
             if (overshoot < 0)
             {
-                return Rotate(overshoot);
+                return true;
             }
         }
-        else // Im on left quadrant
+        else // Inner its on outer left quadrant
         {
-            var overshoot = Vector3.SignedAngle(Start, bounds.Start, _normal);
+            overshoot = Vector3.SignedAngle(inner.Start, outer.Start, outer._normal);
 
             if (overshoot > 0)
             {
-                return Rotate(overshoot);
+                return true;
             }
         }
 
-        return this;
+        return false;
+
     }
     
     public void Draw(Color color)
